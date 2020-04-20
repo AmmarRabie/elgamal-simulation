@@ -1,0 +1,5 @@
+venv/
+*.pyc
+.vscode
+IO/
+ca_store/
