@@ -3,26 +3,21 @@ from utils import getId as randID
 import os
 from time import sleep
 import json
+from rsa import sign
 
 T = TypeVar('T', bound='CA')
 
 # certificate authority simulation
 class Certifcate():
-    def __init__(self, ownerID, publicKey, timestamp=None, validAfter=None, validBefore=None):
+    def __init__(self, ownerID, publicKey, signature=None, timestamp=None, validAfter=None, validBefore=None):
         self.ownerID = ownerID
         self.publicKey = publicKey
         self.timestamp = timestamp
         self.validAfter = validAfter
         self.validBefore = validBefore
+        self.signature = signature
         
 import rsa
-def getCertificate(id):
-    '''
-        id: the id of the owner of the certificate
-    '''
-    pass
-
-
 class CA():
     instance = None
     def __init__(self):
@@ -51,14 +46,18 @@ class CA():
         loc = os.path.join(self.storeDir, loc)
         if(loc.endswith(".pem")):
             key = rsa.loadKey(loc)
+            input(f"message in getCert = {rsa.getBytes(key)}")
+            signature = sign(rsa.getBytes(key), self.privateKey)
         elif(loc.endswith(".o")):# TODO: change it to .json
             with open(loc) as f:
                 fileData = json.load(f)
+                print(fileData)
                 key = fileData["public_key"]
+                signature = sign(key.to_bytes((key.bit_length() + 7) // 8, 'big'), self.privateKey)
         else:
             print(f"Warning: can't get a certificate of {targetID}")
-            return None # we can't find this targetID
-        return Certifcate(targetID, key)
+            return None, None # we can't find this targetID
+        return Certifcate(targetID, key, signature=signature)
     
     def generateDummyCertificates(self, n=100):
         for i in range(n):

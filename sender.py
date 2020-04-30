@@ -10,19 +10,25 @@ strHexOfBytes = lambda digest: "".join(["%02x" % x for x in digest])
 # from utils import verifyCertificate
 
 class Sender():
-    def __init__(self, id):
+    def __init__(self, id, elgamal=None, elgKeyPairs=None):
+        '''
+        :param elgamal: elgamal object of Elgamal class type, if None a new one will be created with default params or will be restored from the file
+        :param elgKeyPairs: key pairs generated from same parameters of elgamal object. if None they will be generated from elgamal object
+        '''
         self.id = id
+        self.ca = CA.get_instance() # this should be called before loading cakey
         self.caKey = self._loadCAKey()
-        if(os.path.exists(ELG_PARAMS_PATH)):
+        if(elgamal):
+            self.elgSig = elgamal
+        elif(os.path.exists(ELG_PARAMS_PATH)):
             self.elgSig = ElgamalDigitalSignature.from_file(ELG_PARAMS_PATH)
         else:
             self.elgSig = ElgamalDigitalSignature()
             self.elgSig.saveConfig(ELG_PARAMS_PATH)
 
-        x, y = self.elgSig.generateUserKey()
+        x, y = elgKeyPairs or self.elgSig.generateUserKey()
         self.privateKey = x
         self.publicKey = y
-        self.ca = CA.get_instance()
         self._authenticateWithCA()
 
     
@@ -30,7 +36,9 @@ class Sender():
         signature = self.elgSig.sign(message, self.privateKey)
         recCertificate = self.ca.getCertificate(whoId)
         # TODO: verifyCertificate
-        self._verifyCertificate(recCertificate)
+        if (not self._verifyCertificate(recCertificate)):
+            print("can't verify the certificate, it is not from the CA :(")
+            return
         message = rsa.encrypt(message, recCertificate.publicKey)
         message = strHexOfBytes(message)
         # print("Encrypted message", message)
@@ -40,7 +48,8 @@ class Sender():
         return rsa.loadKey("ca.public.pem")
 
     def _verifyCertificate(self, certificate):
-        pass
+        input(f"message in _ver = {rsa.getBytes(certificate.publicKey)}")
+        return rsa.verify(certificate.signature, rsa.getBytes(certificate.publicKey), self.caKey)
 
     def _authenticateWithCA(self):
         '''
