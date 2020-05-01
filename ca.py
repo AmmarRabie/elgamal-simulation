@@ -77,6 +77,7 @@ class CA():
         # TODO: save all information in the certificate
         currentPub = certificate.publicKey
         loc = os.path.join(self.storeDir, certificate.ownerID)
+        os.makedirs(os.path.dirname(loc), exist_ok=True)
         if(rsa.isRSAInstance(currentPub)):
             rsa.saveKey(key=currentPub, loc=loc) # TODO: use getBytes instead and save all certificate info
         elif(currentPub):
