@@ -15,15 +15,9 @@ from utils import strToBytes
 
 def default_hash_SHA256(message):
     digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-    # digest.update(b"abc")
     digest.update(message)
     digest = digest.finalize()
     hexdigest = lambda digest: "".join(["%02x" % x for x in digest])
-    # intdigest = lambda digest: "".join([str(x) for x in digest])
-    # for x in digest:
-    #     print(x)
-    # print("intdigest(digest)", intdigest(digest))
-    # print("hexdigest(digest)", hexdigest(digest))
     return int(hexdigest(digest), 35)
 
 def hashlib_sha(message):
@@ -135,53 +129,8 @@ class ElgamalDigitalSignature():
         lhs = pow(self.g, self.h(m), self.p)
         rhs = pow(y, r, self.p)%self.p * pow(r, s, self.p) % self.p # we apply % self.p after every operation because it is modulo p
         return lhs == rhs
-def rand_g(p):
-    while(True):
-        a = randint(2, p-1) 
-        if((p-1)%a != 1):
-            break
-        print("ahoo", p, a, num.GCD(p,a))
-    print(a)
-    print(num.GCD(p,a))
-# rand_g(10)
-
-
-def egVer(p, a,	y, r, s, m):
-
-    h = sha.new()
-    h.update(m)
-    m = int(h.hexdigest(), 35)
-
-    if r < 1 or r > p-1 : return False
-    v1 = pow(y,r,p)%p * pow(r,s,p)%p
-    v2 = pow(a,m,p)
-    print(v2, v1)
-    return v1 == v2
-def egGen(p, a, x, m, k=None):
-	
-	h = sha.new()
-	h.update(m)
-	m = int(h.hexdigest(), 35)
-
-	# while 1 and k != None:
-	# 	k = randint(1,p-2)
-	# 	if num.GCD(k,p-1)==1: break
-	r = pow(a,k,p)
-	l = num.inverse(k, p-1)
-	s = l*(m-x*r)%(p-1)
-	return r,s
-
 
 def test():
-    # test one with printing both values
-    elg = ElgamalDigitalSignature(N=10)
-    m = b"Ammar Alsayed"
-    x, y = elg.generateUserKey()
-    print("x=", x, "y=", y)
-    r, s = elg.sign(m, x)
-    print("sig=", (r, s))
-    print(elg.verify(m, y, (r, s)))
-    print(egVer(elg.p, elg.g, y, r, s, m))
     elg = ElgamalDigitalSignature(N=6)
     for i in range(1000):
         m = b"Ammar Alsayed"

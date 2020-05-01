@@ -46,17 +46,17 @@ class CA():
         loc = os.path.join(self.storeDir, loc)
         if(loc.endswith(".pem")):
             key = rsa.loadKey(loc)
-            input(f"message in getCert = {rsa.getBytes(key)}")
+            # input(f"message in getCert = {rsa.getBytes(key)}")
             signature = sign(rsa.getBytes(key), self.privateKey)
         elif(loc.endswith(".o")):# TODO: change it to .json
             with open(loc) as f:
                 fileData = json.load(f)
-                print(fileData)
                 key = fileData["public_key"]
                 signature = sign(key.to_bytes((key.bit_length() + 7) // 8, 'big'), self.privateKey)
         else:
             print(f"Warning: can't get a certificate of {targetID}")
-            return None, None # we can't find this targetID
+            assert False, f"{targetID} is not existing in the ca. This converted to an error for simulation purpose. make sure that you run the receiver first and then the sender and you make no typos in id names"
+            # return None, None # we can't find this targetID
         return Certifcate(targetID, key, signature=signature)
     
     def generateDummyCertificates(self, n=100):
