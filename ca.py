@@ -93,6 +93,7 @@ class CA():
         for _ in range(0, t, step):
             print(".", end="", flush=True)
             sleep(1)
+        print()
         return True
 
 

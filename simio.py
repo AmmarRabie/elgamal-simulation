@@ -21,7 +21,7 @@ def send(domain, payload):
     messageID = _getFileName()
     with open(os.path.join(recDir, messageID), "w") as f:
         json.dump(payload, f)
-
+    return os.path.join(recDir, messageID)
 
 def listen(domain):
     '''

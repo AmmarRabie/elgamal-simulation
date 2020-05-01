@@ -38,7 +38,6 @@ class Sender():
         self.lastSendInfo = {} # clearing the past info
         signature = self.elgSig.sign(message, self.privateKey) ; self._persist(signature, "signature")
         recCertificate = self.ca.getCertificate(whoId) ; self._persist(recCertificate, "recCertificate")
-        # TODO: verifyCertificate
         if (not self._verifyCertificate(recCertificate)):
             print("can't verify the certificate, it is not from the CA :(")
             self._persist(False, "certificateVer")
@@ -47,7 +46,7 @@ class Sender():
         message = rsa.encrypt(message, recCertificate.publicKey) ; self._persist(message, "cipherBytes")
         message = strHexOfBytes(message) ; self._persist(message, "cipherHex")
         # print("Encrypted message", message)
-        io.send(whoId, {"sender":self.id , "message": message, "signature": signature})
+        return io.send(whoId, {"sender":self.id , "message": message, "signature": signature})
 
     def _loadCAKey(self):
         return rsa.loadKey("ca.public.pem")
@@ -66,19 +65,20 @@ class Sender():
             self.lastSendInfo[key] = var
 
 class SenderApp():
-    def __init__(self, sid="test.security.sender.alice", rid = "test.security.rec.bob"):
+    def __init__(self, sid="test.security.sender.alice", rid = "test.security.rec.bob", dummy=True):
         self.sid = sid
         self.rid = rid
         # 1. generate private/public key pairs for the certificate authority.
         # 2. Initially generate some X509 certificates for random public keys, for random ids and store them in a suitable format (a file or a database)
-        # CA.get_instance().generateDummyCertificates()
+        if dummy:
+            CA.get_instance().generateDummyCertificates(n=20)
 
     def testcases(self):
         '''
             run a sender with test cases included in TEST_PATH_DIR (see simulation_config.py)
         '''
         messages = []
-        for testnumber in os.listdir(TEST_CASES_IN_PATH):
+        for testnumber in [f for f in os.listdir(TEST_CASES_IN_PATH) if f.replace(".txt", "").isdigit()]:
             testpath = os.path.join(TEST_CASES_IN_PATH, testnumber)
             with open(testpath, 'r') as testfile:
                 testcase = testfile.read()

@@ -139,16 +139,16 @@ def test():
         verified = elg.verify(m, y, sig)
         if (not verified):
             print(f"we only passed {i} random tests")
-            print(f"{sig=} {x=} {y=} {elg.p=} {elg.g=} ")
+            print(f"sig={sig} x={x} y={y} p={elg.p} g={elg.g}")
             raise Exception("expected to verify but not verified :(")
         # notVerified = elg.verify(m, y, (sig[0] - 1, sig[1] + 1))
-        # notVerified2 = elg.verify(b's'+  m + b's', y, sig)
-        notVerified3 = elg.verify(m, y + 1, sig)
-        if (notVerified3):
+        notVerified = elg.verify(b's'+  m + b'e', y, sig)
+        if (notVerified):
             print(f"we only passed {i} random tests")
             print(f"{sig=} {x=} {y=} {elg.p=} {elg.g=} ")
             raise Exception("expected to not verify but verified :(")
-        print(f"{i+1} tests passed")
+        if (i+1) % 50 == 0:
+            print(f"{i+1} tests passed")
 
 if __name__ == "__main__":
     test()
@@ -158,6 +158,6 @@ if __name__ == "__main__":
     hashlib = hashlib_sha(m)
     print("crypto", crypto)
     print("crypt+", cryptography)
-    print("haslib", hashlib)
-    print('%064x' % hashlib)
+    # print("haslib", hashlib)
+    # print('%064x' % hashlib)
     pass
