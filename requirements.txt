@@ -1,5 +1,5 @@
 cffi==1.14.0
-cryptography==2.9
+cryptography==3.2
 Faker==4.0.3
 fire==0.3.1
 pathtools==0.1.2
